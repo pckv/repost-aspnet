@@ -35,7 +35,7 @@ namespace RepostAspNet.Controllers
             var user = new User
             {
                 Username = createUser.Username,
-                HashedPassword = createUser.Password
+                HashedPassword = BCrypt.Net.BCrypt.HashPassword(createUser.Password)
             };
 
             _context.Users.Add(user);
