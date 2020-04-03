@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+
+[assembly: ApiController]
 
 namespace RepostAspNet
 {
@@ -19,11 +23,27 @@ namespace RepostAspNet
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSwaggerGen(options => options.SwaggerDoc("openapi", new OpenApiInfo
+            {
+                Title = "Repost",
+                Version = "0.0.1",
+                Description = "Repost API written in ASP.NET Core 3.1 Web APIs\n\n" +
+                              "[View source code on GitHub](URL_HERE)\n\n" +
+                              "Authors: pckv, EspenK, jonsondrem"
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSwagger(options => options.RouteTemplate = "{documentName}.json");
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/openapi.json", "Repost API 0.0.1");
+                options.RoutePrefix = "api/swagger";
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -35,10 +55,7 @@ namespace RepostAspNet
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }
