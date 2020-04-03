@@ -26,7 +26,8 @@ namespace RepostAspNet
             services.AddDbContext<DatabaseContext>(options =>
                 options.UseInMemoryDatabase("RepostDatabase"));
 
-            services.AddControllers();
+            services.AddControllers(options =>
+                options.Filters.Add(new ErrorResponseFilter()));
 
             services.AddSwaggerGen(options => options.SwaggerDoc("openapi", new OpenApiInfo
             {
