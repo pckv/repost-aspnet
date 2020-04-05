@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RepostAspNet.Models;
@@ -7,6 +9,7 @@ using RepostAspNet.Models;
 namespace RepostAspNet.Controllers
 {
     [Route("/api/users")]
+    [Produces(MediaTypeNames.Application.Json)]
     public class UserController : ControllerBase
     {
         private readonly DatabaseContext _context;
@@ -17,12 +20,14 @@ namespace RepostAspNet.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ActionResult<IEnumerable<User>> GetUsers()
         {
             return _context.Users.ToList();
         }
 
         [HttpPost]
+        [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public ActionResult<User> CreateUser(CreateUser createUser)
@@ -43,7 +48,7 @@ namespace RepostAspNet.Controllers
 
             return CreatedAtAction(nameof(GetUser), new {username = user.Username}, user);
         }
-        
+
         [HttpGet]
         [Route("{username}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -55,6 +60,7 @@ namespace RepostAspNet.Controllers
             {
                 return NotFound($"User '{username}' not found");
             }
+
             return user;
         }
     }

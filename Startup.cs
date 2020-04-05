@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -29,14 +33,55 @@ namespace RepostAspNet
             services.AddControllers(options =>
                 options.Filters.Add(new ErrorResponseFilter()));
 
-            services.AddSwaggerGen(options => options.SwaggerDoc("openapi", new OpenApiInfo
+            services.AddSwaggerGen(options =>
             {
-                Title = "Repost",
-                Version = "0.0.1",
-                Description = "Repost API written in ASP.NET Core 3.1 Web APIs\n\n" +
-                              "[View source code on GitHub](URL_HERE)\n\n" +
-                              "Authors: pckv, EspenK, jonsondrem"
-            }));
+                options.SwaggerDoc("openapi", new OpenApiInfo
+                {
+                    Title = "Repost",
+                    Version = "0.0.1",
+                    Description = "Repost API written in ASP.NET Core 3.1 Web APIs\n\n" +
+                                  "[View source code on GitHub](URL_HERE)\n\n" +
+                                  "Authors: pckv, EspenK, jonsondrem"
+                });
+
+                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        Password = new OpenApiOAuthFlow
+                        {
+                            TokenUrl = new Uri("/api/auth/token", UriKind.Relative),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                {"users", "User permissions"}
+                            }
+                        }
+                    }
+                });
+                options.OperationFilter<OpenApiAuthorizationCheckFilter>();
+            });
+
+            var builder = services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddInMemoryApiResources(Config.Apis)
+                .AddInMemoryClients(Config.Clients)
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>();
+
+            builder.Services
+                .Where(descriptor => descriptor.ServiceType == typeof(Endpoint))
+                .Select(item => (Endpoint) item.ImplementationInstance)
+                .ToList()
+                .ForEach(item => item.Path = item.Path.Value.Replace("/connect", "/api/auth"));
+
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = "http://localhost:5000";
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = "users";
+                    options.TokenValidationParameters.ValidateIssuer = false;
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +103,7 @@ namespace RepostAspNet
 
             app.UseRouting();
 
+            app.UseIdentityServer();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());
