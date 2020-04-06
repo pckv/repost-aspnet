@@ -24,7 +24,7 @@ namespace RepostAspNet.Controllers
         [HttpGet]
         public IEnumerable<Resub> GetResubs()
         {
-            return Db.Resubs.Include(r => r.Owner).ToList();
+            return Db.Resubs.ToList();
         }
 
         /// <summary>Create Resub</summary>

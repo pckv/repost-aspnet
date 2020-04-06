@@ -20,7 +20,7 @@ namespace RepostAspNet.Models
 
         [JsonIgnore] public string HashedPassword { get; set; }
 
-        [JsonIgnore] public List<Resub> Resubs { get; set; }
+        [JsonIgnore] public virtual List<Resub> Resubs { get; set; }
     }
 
     public class CreateUser

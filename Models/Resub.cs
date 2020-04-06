@@ -14,7 +14,7 @@ namespace RepostAspNet.Models
         public DateTime Created { get; set; }
         public DateTime? Edited { get; set; }
 
-        [JsonIgnore] public User Owner { get; set; }
+        [JsonIgnore] public virtual User Owner { get; set; }
         [JsonPropertyName("owner_username")] public string OwnerUsername => Owner.Username;
 
         public bool IsOwner(User user)
