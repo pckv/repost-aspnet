@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
@@ -101,6 +102,15 @@ namespace RepostAspNet.Controllers
             }
 
             return user;
+        }
+
+        /// <summary>Get Resubs Owned By User</summary>
+        /// <remarks>Get all resubs owned by a specific user.</remarks>
+        [HttpGet]
+        [Route("{username}/resubs")]
+        public IEnumerable<Resub> GetResubsOwnedByUser(string username)
+        {
+            return GetUser(username).Resubs;
         }
     }
 }
