@@ -24,7 +24,7 @@ namespace RepostAspNet.Controllers
         [HttpGet]
         public IEnumerable<Resub> GetResubs()
         {
-            return Db.Resubs.ToList();
+            return Db.Resubs.Include(r => r.Owner).ToList();
         }
 
         /// <summary>Create Resub</summary>
@@ -54,16 +54,16 @@ namespace RepostAspNet.Controllers
             Db.Resubs.Add(resub);
             Db.SaveChanges();
 
-            return CreatedAtAction(nameof(GetResub), new {name = resub.Name}, resub);
+            return CreatedAtAction(nameof(GetResub), new {resub = resub.Name}, resub);
         }
 
         /// <summary>Get Resub</summary>
         /// <remarks>Get a specific resub.</remarks>
         [HttpGet]
-        [Route("{name}")]
+        [Route("{resub}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public Resub GetResub(string name)
+        public Resub GetResub([FromRoute(Name = "resub")] string name)
         {
             var resub = Db.Resubs.Include(r => r.Owner).SingleOrDefault(r => r.Name == name);
             if (resub == null)
@@ -80,11 +80,11 @@ namespace RepostAspNet.Controllers
         ///     Only the owner of a resub can edit the resub.
         /// </remarks>
         [HttpPatch]
-        [Route("{name}")]
+        [Route("{resub}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [Authorize]
-        public Resub EditResub(string name, EditResub editResub)
+        public Resub EditResub([FromRoute(Name = "resub")] string name, EditResub editResub)
         {
             var resub = GetResub(name);
             if (!resub.IsAllowedToEdit(GetAuthorizedUser()))
@@ -110,11 +110,11 @@ namespace RepostAspNet.Controllers
         ///     Only the owner of a resub can delete the resub.
         /// </remarks>
         [HttpDelete]
-        [Route("{name}")]
+        [Route("{resub}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [Authorize]
-        public ActionResult DeleteResub(string name)
+        public ActionResult DeleteResub([FromRoute(Name = "resub")] string name)
         {
             var resub = GetResub(name);
             if (!resub.IsAllowedToEdit(GetAuthorizedUser()))
@@ -125,6 +125,45 @@ namespace RepostAspNet.Controllers
             Db.Remove(resub);
             Db.SaveChanges();
             return NoContent();
+        }
+
+        /// <summary>Get Posts In Resub</summary>
+        /// <remarks>Get all posts in a resub.</remarks>
+        [HttpGet]
+        [Route("{resub}/posts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public IEnumerable<Post> GetPostsInResub([FromRoute(Name = "resub")] string name)
+        {
+            var resub = GetResub(name);
+            Db.Entry(resub).Collection(r => r.Posts).Load();
+            return resub.Posts;
+        }
+
+        /// <summary>Create Post In Resub</summary>
+        /// <remarks>Create a new post in a resub.</remarks>
+        [HttpPost]
+        [Route("{resub}/posts")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [Authorize]
+        public ActionResult<Post> CreatePostInResub([FromRoute(Name = "resub")] string name, CreatePost createPost)
+        {
+            var post = new Post
+            {
+                Author = GetAuthorizedUser(),
+                ParentResub = GetResub(name),
+                Title = createPost.Title,
+                Content = createPost.Content,
+                Url = createPost.Url,
+                Created = DateTime.Now
+            };
+
+            Db.Posts.Add(post);
+            Db.SaveChanges();
+
+            return CreatedAtRoute("GetPost", new {post_id = post.Id}, post);
         }
     }
 }

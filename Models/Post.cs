@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace RepostAspNet.Models
 {
+    [Table("posts")]
     public class Post
     {
         public int Id { get; set; }
@@ -14,8 +16,8 @@ namespace RepostAspNet.Models
         public DateTime Created { get; set; }
         public DateTime? Edited { get; set; }
 
-        [JsonIgnore] public virtual Resub ParentResub { get; set; }
-        [JsonIgnore] public virtual User Author { get; set; }
+        [JsonIgnore] public Resub ParentResub { get; set; }
+        [JsonIgnore] public User Author { get; set; }
 
         [JsonPropertyName("parent_resub_name")]
         public string ParentResubName => ParentResub.Name;

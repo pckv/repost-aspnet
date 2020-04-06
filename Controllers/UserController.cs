@@ -110,7 +110,9 @@ namespace RepostAspNet.Controllers
         [Route("{username}/resubs")]
         public IEnumerable<Resub> GetResubsOwnedByUser(string username)
         {
-            return GetUser(username).Resubs;
+            var user = GetUser(username);
+            Db.Entry(user).Collection(u => u.Resubs).Load();
+            return user.Resubs;
         }
     }
 }

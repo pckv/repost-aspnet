@@ -28,10 +28,9 @@ namespace RepostAspNet
         {
             services.AddDbContext<DatabaseContext>(options =>
             {
-                options.UseLazyLoadingProxies()
-                    // Create an in memory database
-                    // TODO: Use SQL
-                    .UseInMemoryDatabase("RepostDatabase");
+                // Create an in memory database
+                // TODO: Use SQL
+                options.UseInMemoryDatabase("RepostDatabase");
             });
 
             services.AddControllers(options =>
