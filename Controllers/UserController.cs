@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Net.Mime;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RepostAspNet.Models;
@@ -7,17 +8,13 @@ using RepostAspNet.Models;
 namespace RepostAspNet.Controllers
 {
     [Route("/api/users")]
-    [Produces(MediaTypeNames.Application.Json)]
-    public class UserController : ControllerBase
+    public class UserController : ApiControllerBase
     {
-        private readonly DatabaseContext _context;
-
-        public UserController(DatabaseContext context)
+        public UserController(DatabaseContext context) : base(context)
         {
-            _context = context;
         }
 
-        /// <summary>Create user</summary>
+        /// <summary>Create User</summary>
         /// <remarks>Create a new user.</remarks>
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
@@ -25,9 +22,10 @@ namespace RepostAspNet.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public ActionResult<User> CreateUser(CreateUser createUser)
         {
-            if (_context.Users.Any(u => u.Username == createUser.Username))
+            if (Db.Users.Any(u => u.Username == createUser.Username))
             {
-                return BadRequest($"User '{createUser.Username}' already exists");
+                throw new StatusException(StatusCodes.Status400BadRequest,
+                    $"User '{createUser.Username}' already exists");
             }
 
             var user = new User
@@ -36,24 +34,34 @@ namespace RepostAspNet.Controllers
                 HashedPassword = BCrypt.Net.BCrypt.HashPassword(createUser.Password)
             };
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            Db.Users.Add(user);
+            Db.SaveChanges();
 
             return CreatedAtAction(nameof(GetUser), new {username = user.Username}, user);
         }
 
-        /// <summary>Get user</summary>
+        /// <summary>Get Current User</summary>
+        /// <remarks>Get the currently authorized user.</remarks>
+        [HttpGet]
+        [Route("me")]
+        [Authorize]
+        public User GetCurrentUser()
+        {
+            return GetAuthorizedUser();
+        }
+
+        /// <summary>Get User</summary>
         /// <remarks>Get a specific user.</remarks>
         [HttpGet]
         [Route("{username}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public ActionResult<User> GetUser(string username)
+        public User GetUser(string username)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            var user = Db.Users.SingleOrDefault(u => u.Username == username);
             if (user == null)
             {
-                return NotFound($"User '{username}' not found");
+                throw new StatusException(StatusCodes.Status404NotFound, $"User '{username}' not found");
             }
 
             return user;
