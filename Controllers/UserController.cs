@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RepostAspNet.Models;
@@ -19,8 +18,8 @@ namespace RepostAspNet.Controllers
             _context = context;
         }
 
+
         [HttpGet]
-        [Authorize]
         public ActionResult<IEnumerable<User>> GetUsers()
         {
             return _context.Users.ToList();

@@ -7,6 +7,7 @@ namespace RepostAspNet
     {
         public static IEnumerable<ApiResource> Apis => new[]
         {
+            // The name of the resource will also be the name of the scope
             new ApiResource("users", "Users")
         };
 

@@ -8,6 +8,7 @@ namespace RepostAspNet
     {
         public void OnActionExecuted(ActionExecutedContext context)
         {
+            // Use ErrorResponse as result when the status code is >= 400
             if (context.Result is ObjectResult result && result.StatusCode >= 400 && result.Value is string detail)
             {
                 context.Result = new ObjectResult(new ErrorResponse {Detail = detail})
