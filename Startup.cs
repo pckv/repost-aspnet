@@ -63,7 +63,7 @@ namespace RepostAspNet
                             TokenUrl = new Uri("/api/auth/token", UriKind.Relative),
                             Scopes = new Dictionary<string, string>
                             {
-                                {"users", "User access"}
+                                {"user", "User access"}
                             }
                         }
                     }
@@ -101,7 +101,7 @@ namespace RepostAspNet
                 {
                     options.Authority = "http://localhost:5000";
                     options.RequireHttpsMetadata = false;
-                    options.Audience = "users";
+                    options.Audience = "user";
                     options.TokenValidationParameters.ValidateIssuer = false;
                 });
         }

@@ -8,7 +8,7 @@ namespace RepostAspNet
         public static IEnumerable<ApiResource> Apis => new[]
         {
             // The name of the resource will also be the name of the scope
-            new ApiResource("users", "Users")
+            new ApiResource("user", "User")
         };
 
         public static IEnumerable<Client> Clients => new[]
@@ -18,7 +18,7 @@ namespace RepostAspNet
                 ClientId = "client",
                 ClientSecrets = {new Secret("secret".Sha256())},
                 AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                AllowedScopes = {"users"}
+                AllowedScopes = {"user"}
             }
         };
     }
