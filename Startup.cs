@@ -34,10 +34,12 @@ namespace RepostAspNet
             });
 
             services.AddControllers(options =>
-            {
-                // Add filter to format all errors (status >= 400) as the ErrorResponse model
-                options.Filters.Add(new ErrorResponseFilter());
-            });
+                {
+                    // Add filter to format all errors (status >= 400) as the ErrorResponse model
+                    options.Filters.Add(new ErrorResponseFilter());
+                })
+                // Registers all controllers as services, which allows for dependency injection
+                .AddControllersAsServices();
 
             services.AddSwaggerGen(options =>
             {
