@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,7 +51,7 @@ namespace RepostAspNet
                     Title = "Repost",
                     Version = "0.0.1",
                     Description = "Repost API written in ASP.NET Core 3.1 Web APIs\n\n" +
-                                  "[View source code on GitHub](URL_HERE)\n\n" +
+                                  "[View source code on GitHub](https://github.com/pckv/repost-aspnet)\n\n" +
                                   "Authors: pckv, EspenK, jonsondrem"
                 });
 
@@ -69,6 +71,11 @@ namespace RepostAspNet
                         }
                     }
                 });
+
+                // Enable use of generated XML document to annotate endpoint name and description in OpenAPI
+                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                var path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
+                options.IncludeXmlComments(path);
 
                 // Add OpenAPI operation filter to add security schemes to all authorized endpoints automatically
                 options.OperationFilter<OpenApiAuthorizationCheckFilter>();

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
@@ -18,13 +17,8 @@ namespace RepostAspNet.Controllers
             _context = context;
         }
 
-
-        [HttpGet]
-        public ActionResult<IEnumerable<User>> GetUsers()
-        {
-            return _context.Users.ToList();
-        }
-
+        /// <summary>Create user</summary>
+        /// <remarks>Create a new user.</remarks>
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -48,6 +42,8 @@ namespace RepostAspNet.Controllers
             return CreatedAtAction(nameof(GetUser), new {username = user.Username}, user);
         }
 
+        /// <summary>Get user</summary>
+        /// <remarks>Get a specific user.</remarks>
         [HttpGet]
         [Route("{username}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
