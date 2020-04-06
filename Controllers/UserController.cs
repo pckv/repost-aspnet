@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,7 @@ namespace RepostAspNet.Controllers
         /// <remarks>Create a new user.</remarks>
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public ActionResult<User> CreateUser(CreateUser createUser)
         {
@@ -31,12 +32,12 @@ namespace RepostAspNet.Controllers
             var user = new User
             {
                 Username = createUser.Username,
-                HashedPassword = BCrypt.Net.BCrypt.HashPassword(createUser.Password)
+                HashedPassword = BCrypt.Net.BCrypt.HashPassword(createUser.Password),
+                Created = DateTime.Now
             };
 
             Db.Users.Add(user);
             Db.SaveChanges();
-
             return CreatedAtAction(nameof(GetUser), new {username = user.Username}, user);
         }
 
@@ -48,6 +49,41 @@ namespace RepostAspNet.Controllers
         public User GetCurrentUser()
         {
             return GetAuthorizedUser();
+        }
+
+        /// <summary>Edit Current User</summary>
+        /// <remarks>Edit the currently authorized user.</remarks>
+        [HttpPatch]
+        [Route("me")]
+        [Authorize]
+        public User EditCurrentUser(EditUser editUser)
+        {
+            var user = GetAuthorizedUser();
+
+            if (editUser.IsFieldSet(nameof(editUser.Bio)))
+                user.Bio = editUser.Bio;
+            if (editUser.IsFieldSet(nameof(editUser.AvatarUrl)))
+                user.AvatarUrl = editUser.AvatarUrl;
+
+            user.Edited = DateTime.Now;
+
+            Db.SaveChanges();
+            return user;
+        }
+
+        /// <summary>Delete Current User</summary>
+        /// <remarks>Delete the currently authorized user.</remarks>
+        [HttpDelete]
+        [Route("me")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public ActionResult DeleteCurrentUser()
+        {
+            var user = GetAuthorizedUser();
+
+            Db.Users.Remove(user);
+            Db.SaveChanges();
+            return NoContent();
         }
 
         /// <summary>Get User</summary>
