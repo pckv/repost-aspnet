@@ -38,6 +38,11 @@ namespace RepostAspNet.Controllers
             return post;
         }
 
+        /// <summary>Edit Post</summary>
+        /// <remarks>
+        ///     Edit a post in a resub.
+        ///     Only the author of a post can edit the post.
+        /// </remarks>
         [HttpPatch]
         [Route("{post_id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -76,6 +81,11 @@ namespace RepostAspNet.Controllers
             return post;
         }
 
+        /// <summary>Delete Post</summary>
+        /// <remarks>
+        ///     Delete a post in a resub.
+        ///     Only the author of a post or the owner of the parent resub can delete the post.
+        /// </remarks>
         [HttpDelete]
         [Route("{post_id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -97,6 +107,8 @@ namespace RepostAspNet.Controllers
             return NoContent();
         }
 
+        /// <summary>Vote Post</summary>
+        /// <remarks>Vote on a post in a resub.</remarks>
         [HttpPatch]
         [Route("{post_id}/vote/{vote}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
