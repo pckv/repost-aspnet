@@ -143,6 +143,7 @@ namespace RepostAspNet.Controllers
                 .Collection(r => r.Posts).Query()
                 .Include(p => p.ParentResub)
                 .Include(p => p.Author)
+                .Include(p => p.Votes)
                 .Load();
 
             return resub.Posts;
@@ -170,6 +171,7 @@ namespace RepostAspNet.Controllers
 
             Db.Posts.Add(post);
             Db.SaveChanges();
+            Db.Entry(post).Collection(p => p.Votes).Load();
 
             return CreatedAtRoute("GetPost", new {post_id = post.Id}, post);
         }

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace RepostAspNet.Models
@@ -18,14 +20,15 @@ namespace RepostAspNet.Models
 
         [JsonIgnore] public Resub ParentResub { get; set; }
         [JsonIgnore] public User Author { get; set; }
+        [JsonIgnore] public List<PostVote> Votes { get; set; }
 
         [JsonPropertyName("parent_resub_name")]
         public string ParentResubName => ParentResub.Name;
 
         [JsonPropertyName("author_username")] public string AuthorUsername => Author.Username;
 
-        // TODO: Implement votes 
-        public int Votes => 0;
+        // TODO: Implement votes
+        [JsonPropertyName("votes")] public int SumVotes => Votes.Sum(v => v.Vote);
 
         public bool IsAuthor(User user)
         {
@@ -64,5 +67,15 @@ namespace RepostAspNet.Models
             get => (string) GetField(nameof(Url));
             set => SetField(nameof(Url), value);
         }
+    }
+
+    [Table("posts_votes")]
+    public class PostVote
+    {
+        public int PostId { get; set; }
+        public Post Post { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
+        public int Vote { get; set; }
     }
 }

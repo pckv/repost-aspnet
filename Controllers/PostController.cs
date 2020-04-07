@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +27,7 @@ namespace RepostAspNet.Controllers
             var post = Db.Posts
                 .Include(p => p.ParentResub)
                 .Include(p => p.Author)
+                .Include(p => p.Votes)
                 .SingleOrDefault(p => p.Id == postId);
 
             if (post == null)
@@ -93,6 +95,43 @@ namespace RepostAspNet.Controllers
             Db.Remove(post);
             Db.SaveChanges();
             return NoContent();
+        }
+
+        [HttpPatch]
+        [Route("{post_id}/vote/{vote}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status422UnprocessableEntity)]
+        [Authorize]
+        public Post VotePost([FromRoute(Name = "post_id")] int postId, [Range(-1, 1)] int vote)
+        {
+            var author = GetAuthorizedUser();
+            var post = GetPost(postId);
+
+            var postVote = Db.PostsVotes.SingleOrDefault(p => p.User == author && p.Post == post);
+            if (postVote != null)
+            {
+                if (vote == 0)
+                {
+                    Db.PostsVotes.Remove(postVote);
+                }
+                else
+                {
+                    postVote.Vote = vote;
+                }
+            }
+            else
+            {
+                Db.PostsVotes.Add(new PostVote
+                {
+                    User = author,
+                    Post = post,
+                    Vote = vote
+                });
+            }
+
+            Db.SaveChanges();
+            Db.Entry(post).Reload();
+            return post;
         }
     }
 }

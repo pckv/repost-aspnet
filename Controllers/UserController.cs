@@ -126,9 +126,9 @@ namespace RepostAspNet.Controllers
         public IEnumerable<Post> GetPostsOwnedByUser(string username)
         {
             var user = GetUser(username);
-            Db.Entry(user)
-                .Collection(u => u.Posts).Query()
+            Db.Entry(user).Collection(u => u.Posts).Query()
                 .Include(p => p.ParentResub)
+                .Include(p => p.Votes)
                 .Load();
 
             return user.Posts;
