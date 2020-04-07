@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +21,7 @@ namespace RepostAspNet.Controllers
         /// <remarks>Get a specific post in a resub.</remarks>
         [HttpGet]
         [Route("{post_id}", Name = "GetPost")]
-        [ProducesResponseType(typeof(Post), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public Post GetPost([FromRoute(Name = "post_id")] int postId)
         {
@@ -144,6 +145,55 @@ namespace RepostAspNet.Controllers
             Db.SaveChanges();
             Db.Entry(post).Reload();
             return post;
+        }
+
+        /// <summary>Get Comments In Post</summary>
+        /// <remarks>Get all posts in a resub.</remarks>
+        [HttpGet]
+        [Route("{post_id}/comments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public IEnumerable<Comment> GetCommentsInPost([FromRoute(Name = "post_id")] int postId)
+        {
+            var post = GetPost(postId);
+            Db.Entry(post)
+                .Collection(p => p.Comments).Query()
+                .Include(c => c.ParentResub)
+                .Include(c => c.ParentPost)
+                .Include(c => c.ParentComment)
+                .Include(c => c.Author)
+                .Include(c => c.Votes)
+                .Load();
+
+            return post.Comments;
+        }
+
+        /// <summary>Create Comment In Post</summary>
+        /// <remarks>Create a new comment in a post.</remarks>
+        [HttpPost]
+        [Route("{post_id}/comments")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [Authorize]
+        public ActionResult<Comment> CreateCommentInPost([FromRoute(Name = "post_id")] int postId,
+            CreateComment createComment)
+        {
+            var post = GetPost(postId);
+            var comment = new Comment
+            {
+                Author = GetAuthorizedUser(),
+                ParentPost = post,
+                ParentResub = post.ParentResub,
+                Content = createComment.Content,
+                Created = DateTime.UtcNow
+            };
+
+            Db.Comments.Add(comment);
+            Db.SaveChanges();
+            Db.Entry(comment).Collection(c => c.Votes).Load();
+
+            return CreatedAtRoute("GetComment", new {comment_id = comment.Id}, comment);
         }
     }
 }

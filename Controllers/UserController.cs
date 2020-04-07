@@ -117,13 +117,13 @@ namespace RepostAspNet.Controllers
             return user.Resubs;
         }
 
-        /// <summary>Get Posts Owned By User</summary>
-        /// <remarks>Get all posts owned by a specific user.</remarks>
+        /// <summary>Get Posts By User</summary>
+        /// <remarks>Get all posts by a specific user.</remarks>
         [HttpGet]
         [Route("{username}/posts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Post> GetPostsOwnedByUser(string username)
+        public IEnumerable<Post> GetPostsByUser(string username)
         {
             var user = GetUser(username);
             Db.Entry(user).Collection(u => u.Posts).Query()
@@ -132,6 +132,25 @@ namespace RepostAspNet.Controllers
                 .Load();
 
             return user.Posts;
+        }
+
+        /// <summary>Get Comments By User</summary>
+        /// <remarks>Get all comments by a specific user.</remarks>
+        [HttpGet]
+        [Route("{username}/comments")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public IEnumerable<Comment> GetCommentsByUser(string username)
+        {
+            var user = GetUser(username);
+            Db.Entry(user).Collection(u => u.Comments).Query()
+                .Include(c => c.ParentResub)
+                .Include(c => c.ParentPost)
+                .Include(c => c.ParentComment)
+                .Include(c => c.Votes)
+                .Load();
+
+            return user.Comments;
         }
     }
 }

@@ -141,7 +141,6 @@ namespace RepostAspNet.Controllers
             var resub = GetResub(name);
             Db.Entry(resub)
                 .Collection(r => r.Posts).Query()
-                .Include(p => p.ParentResub)
                 .Include(p => p.Author)
                 .Include(p => p.Votes)
                 .Load();

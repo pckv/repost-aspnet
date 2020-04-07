@@ -22,6 +22,7 @@ namespace RepostAspNet.Models
 
         [JsonIgnore] public List<Resub> Resubs { get; set; }
         [JsonIgnore] public List<Post> Posts { get; set; }
+        [JsonIgnore] public List<Comment> Comments { get; set; }
     }
 
     public class CreateUser

@@ -6,27 +6,31 @@ using System.Text.Json.Serialization;
 
 namespace RepostAspNet.Models
 {
-    [Table("posts")]
-    public class Post
+    [Table("comments")]
+    public class Comment
     {
         public int Id { get; set; }
 
-        public string Title { get; set; }
         public string Content { get; set; }
-        public string Url { get; set; }
 
         public DateTime Created { get; set; }
         public DateTime? Edited { get; set; }
 
         [JsonIgnore] public Resub ParentResub { get; set; }
+        [JsonIgnore] public Post ParentPost { get; set; }
+        [JsonIgnore] public Comment ParentComment { get; set; }
         [JsonIgnore] public User Author { get; set; }
-        [JsonIgnore] public List<PostVote> Votes { get; set; }
-        [JsonIgnore] public List<Comment> Comments { get; set; }
+        [JsonIgnore] public List<CommentVote> Votes { get; set; }
 
         [JsonPropertyName("parent_resub_name")]
         public string ParentResubName => ParentResub.Name;
 
         [JsonPropertyName("author_username")] public string AuthorUsername => Author.Username;
+        [JsonPropertyName("parent_post_id")] public int ParentPostId => ParentPost.Id;
+
+        [JsonPropertyName("parent_comment_id")]
+        public int? ParentCommentId => ParentComment?.Id;
+
         [JsonPropertyName("votes")] public int SumVotes => Votes.Sum(v => v.Vote);
 
         public bool IsAuthor(User user)
@@ -40,39 +44,21 @@ namespace RepostAspNet.Models
         }
     }
 
-    public class CreatePost
+    public class CreateComment
     {
-        public string Title { get; set; }
         public string Content { get; set; }
-        public string Url { get; set; }
     }
 
-    public class EditPost : EditModel
+    public class EditComment : EditModel
     {
-        public string Title
-        {
-            get => (string) GetField(nameof(Title));
-            set => SetField(nameof(Title), value);
-        }
-
-        public string Content
-        {
-            get => (string) GetField(nameof(Content));
-            set => SetField(nameof(Content), value);
-        }
-
-        public string Url
-        {
-            get => (string) GetField(nameof(Url));
-            set => SetField(nameof(Url), value);
-        }
+        public string Content { get; set; }
     }
 
-    [Table("posts_votes")]
-    public class PostVote
+    [Table("comments_votes")]
+    public class CommentVote
     {
-        public int PostId { get; set; }
-        public Post Post { get; set; }
+        public int CommentId { get; set; }
+        public Comment Comment { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
         public int Vote { get; set; }
