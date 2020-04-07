@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using RepostAspNet.Models;
+using Endpoint = IdentityServer4.Hosting.Endpoint;
 
 namespace RepostAspNet
 {
@@ -36,10 +39,29 @@ namespace RepostAspNet
             services.AddControllers(options =>
                 {
                     // Add filter to format all errors (status >= 400) as the ErrorResponse model
+                    // This can not handle validation errors. Those are handled in .ConfigureApiBehaviorOptions
                     options.Filters.Add(new ErrorResponseFilter());
                 })
+
                 // Registers all controllers as services, which allows for dependency injection
-                .AddControllersAsServices();
+                .AddControllersAsServices()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    // Convert default validation errors to 422 using ErrorResponse as a model
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        // Compile a list of formatted strings of all the validation errors for the model
+                        var errors = context.ModelState
+                            .Where(error => error.Value.Errors.Count > 0)
+                            .Select(error =>
+                                $"Failed to validate field {error.Key}: {error.Value.Errors.FirstOrDefault()?.ErrorMessage}");
+
+                        return new ObjectResult(new ErrorResponse {Detail = string.Join(", ", errors)})
+                        {
+                            StatusCode = StatusCodes.Status422UnprocessableEntity
+                        };
+                    };
+                });
 
             services.AddSwaggerGen(options =>
             {
