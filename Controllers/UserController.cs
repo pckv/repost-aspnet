@@ -5,6 +5,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepostAspNet.Models;
 
 namespace RepostAspNet.Controllers
@@ -65,7 +66,6 @@ namespace RepostAspNet.Controllers
                 user.Bio = editUser.Bio;
             if (editUser.IsFieldSet(nameof(editUser.AvatarUrl)))
                 user.AvatarUrl = editUser.AvatarUrl;
-
             user.Edited = DateTime.UtcNow;
 
             Db.SaveChanges();
@@ -108,11 +108,30 @@ namespace RepostAspNet.Controllers
         /// <remarks>Get all resubs owned by a specific user.</remarks>
         [HttpGet]
         [Route("{username}/resubs")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public IEnumerable<Resub> GetResubsOwnedByUser(string username)
         {
             var user = GetUser(username);
             Db.Entry(user).Collection(u => u.Resubs).Load();
             return user.Resubs;
+        }
+
+        /// <summary>Get Posts Owned By User</summary>
+        /// <remarks>Get all posts owned by a specific user.</remarks>
+        [HttpGet]
+        [Route("{username}/posts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public IEnumerable<Post> GetPostsOwnedByUser(string username)
+        {
+            var user = GetUser(username);
+            Db.Entry(user)
+                .Collection(u => u.Posts).Query()
+                .Include(p => p.ParentResub)
+                .Load();
+
+            return user.Posts;
         }
     }
 }

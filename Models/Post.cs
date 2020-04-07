@@ -26,6 +26,16 @@ namespace RepostAspNet.Models
 
         // TODO: Implement votes 
         public int Votes => 0;
+
+        public bool IsAuthor(User user)
+        {
+            return user == Author;
+        }
+
+        public bool CanDelete(User user)
+        {
+            return IsAuthor(user) || ParentResub.IsOwner(user);
+        }
     }
 
     public class CreatePost

@@ -82,24 +82,23 @@ namespace RepostAspNet.Controllers
         [HttpPatch]
         [Route("{resub}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [Authorize]
         public Resub EditResub([FromRoute(Name = "resub")] string name, EditResub editResub)
         {
+            var user = GetAuthorizedUser();
             var resub = GetResub(name);
-            if (!resub.IsAllowedToEdit(GetAuthorizedUser()))
+            if (!resub.IsOwner(user))
             {
-                throw new StatusException(StatusCodes.Status403Forbidden, "You are not the owner of the resub");
+                throw new StatusException(StatusCodes.Status403Forbidden,
+                    $"User '{user.Username}' lacks permission to edit resub '{resub.Name}'");
             }
 
             if (editResub.IsFieldSet(nameof(editResub.Description)))
                 resub.Description = editResub.Description;
             if (editResub.NewOwnerUsername != null)
-            {
-                var newOwner = _userController.GetUser(editResub.NewOwnerUsername);
-                resub.Owner = newOwner;
-            }
-
+                resub.Owner = _userController.GetUser(editResub.NewOwnerUsername);
             resub.Edited = DateTime.UtcNow;
 
             Db.SaveChanges();
@@ -118,10 +117,12 @@ namespace RepostAspNet.Controllers
         [Authorize]
         public ActionResult DeleteResub([FromRoute(Name = "resub")] string name)
         {
+            var user = GetAuthorizedUser();
             var resub = GetResub(name);
-            if (!resub.IsAllowedToEdit(GetAuthorizedUser()))
+            if (!resub.CanDelete(user))
             {
-                throw new StatusException(StatusCodes.Status403Forbidden, "You are not the owner of the resub");
+                throw new StatusException(StatusCodes.Status403Forbidden,
+                    $"User '{user.Username}' lacks permission to delete resub '{resub.Name}'");
             }
 
             Db.Remove(resub);
@@ -138,7 +139,12 @@ namespace RepostAspNet.Controllers
         public IEnumerable<Post> GetPostsInResub([FromRoute(Name = "resub")] string name)
         {
             var resub = GetResub(name);
-            Db.Entry(resub).Collection(r => r.Posts).Load();
+            Db.Entry(resub)
+                .Collection(r => r.Posts).Query()
+                .Include(p => p.ParentResub)
+                .Include(p => p.Author)
+                .Load();
+
             return resub.Posts;
         }
 

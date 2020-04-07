@@ -25,7 +25,7 @@ namespace RepostAspNet.Models
             return user == Owner;
         }
 
-        public bool IsAllowedToEdit(User user)
+        public bool CanDelete(User user)
         {
             return IsOwner(user);
         }

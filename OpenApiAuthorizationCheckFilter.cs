@@ -30,9 +30,12 @@ namespace RepostAspNet
                 }
             };
 
-            // Add 401 and 403 to the possible responses
-            operation.Responses.Add("401", new OpenApiResponse {Description = "Unauthorized", Content = content});
-            operation.Responses.Add("403", new OpenApiResponse {Description = "Forbidden", Content = content});
+            // Add 400 and 401 to the possible responses
+            if (!operation.Responses.ContainsKey("400"))
+                operation.Responses.Add("400", new OpenApiResponse {Description = "Bad Request", Content = content});
+
+            if (!operation.Responses.ContainsKey("401"))
+                operation.Responses.Add("401", new OpenApiResponse {Description = "Unauthorized", Content = content});
 
             // Add a reference to OAuth2 as the security scheme required for the endpoint
             operation.Security = new List<OpenApiSecurityRequirement>
