@@ -34,7 +34,7 @@ namespace RepostAspNet.Controllers
             {
                 Username = createUser.Username,
                 HashedPassword = BCrypt.Net.BCrypt.HashPassword(createUser.Password),
-                Created = DateTime.Now
+                Created = DateTime.UtcNow
             };
 
             Db.Users.Add(user);
@@ -66,7 +66,7 @@ namespace RepostAspNet.Controllers
             if (editUser.IsFieldSet(nameof(editUser.AvatarUrl)))
                 user.AvatarUrl = editUser.AvatarUrl;
 
-            user.Edited = DateTime.Now;
+            user.Edited = DateTime.UtcNow;
 
             Db.SaveChanges();
             return user;

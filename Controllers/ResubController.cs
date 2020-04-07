@@ -48,7 +48,7 @@ namespace RepostAspNet.Controllers
                 Owner = owner,
                 Name = createResub.Name,
                 Description = createResub.Description,
-                Created = DateTime.Now
+                Created = DateTime.UtcNow
             };
 
             Db.Resubs.Add(resub);
@@ -99,6 +99,8 @@ namespace RepostAspNet.Controllers
                 var newOwner = _userController.GetUser(editResub.NewOwnerUsername);
                 resub.Owner = newOwner;
             }
+
+            resub.Edited = DateTime.UtcNow;
 
             Db.SaveChanges();
             return resub;
@@ -157,7 +159,7 @@ namespace RepostAspNet.Controllers
                 Title = createPost.Title,
                 Content = createPost.Content,
                 Url = createPost.Url,
-                Created = DateTime.Now
+                Created = DateTime.UtcNow
             };
 
             Db.Posts.Add(post);
