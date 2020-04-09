@@ -9,6 +9,7 @@ namespace RepostAspNet
         {
         }
         
+        public DbSet<User> Users { get; set; }
         public DbSet<Resub> Resubs { get; set; }
     }
 }

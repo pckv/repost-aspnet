@@ -3,4 +3,7 @@ obj/
 /packages/
 .idea
 
+*.rsa
+*.blob
+
 RepostAspNet.sln.DotSettings.user
