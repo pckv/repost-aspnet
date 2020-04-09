@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -18,6 +19,8 @@ namespace RepostAspNet.Models
         public DateTime? Edited { get; set; }
 
         [JsonIgnore] public string HashedPassword { get; set; }
+
+        [JsonIgnore] public virtual List<Resub> Resubs { get; set; }
     }
 
     public class CreateUser
