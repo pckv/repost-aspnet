@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -14,7 +15,9 @@ namespace RepostAspNet.Models
         public DateTime Created { get; set; }
         public DateTime? Edited { get; set; }
 
-        [JsonIgnore] public virtual User Owner { get; set; }
+        [JsonIgnore] public User Owner { get; set; }
+        [JsonIgnore] public List<Post> Posts { get; set; }
+
         [JsonPropertyName("owner_username")] public string OwnerUsername => Owner.Username;
 
         public bool IsOwner(User user)
@@ -22,7 +25,7 @@ namespace RepostAspNet.Models
             return user == Owner;
         }
 
-        public bool IsAllowedToEdit(User user)
+        public bool CanDelete(User user)
         {
             return IsOwner(user);
         }
