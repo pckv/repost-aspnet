@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RepostAspNet.Models;
 using Endpoint = IdentityServer4.Hosting.Endpoint;
@@ -19,12 +20,16 @@ namespace RepostAspNet
 {
     public class Startup
     {
+        private readonly IConfig _config;
+
+        // The Logger in Core 3 is not initialized until Startup.Configure
+        private readonly List<(LogLevel, string)> _log;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _log = new List<(LogLevel, string)>();
+            _config = new Config(configuration, _log);
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -105,10 +110,21 @@ namespace RepostAspNet
             // Setup authorization and authentication server with a resource owner validator for
             // authorizing database users
             var builder = services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddInMemoryApiResources(Config.Apis)
-                .AddInMemoryClients(Config.Clients)
+                .AddInMemoryApiResources(_config.Apis)
+                .AddInMemoryClients(_config.Clients)
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>();
+
+            // Load signing key from configuration or default to developer signing key if configuration is missing
+            var signingCredential = _config.SigningCredential;
+            if (signingCredential != null)
+            {
+                builder.AddSigningCredential(signingCredential);
+            }
+            else
+            {
+                _log.Add((LogLevel.Warning, "Defaulting to temporary signing credential"));
+                builder.AddDeveloperSigningCredential();
+            }
 
             // Hack to reroute the OpenID endpoint to /api/auth
             // We only require the /token endpoint for our OAuth2 setup, so this hack adjusts the endpoint to
@@ -123,7 +139,7 @@ namespace RepostAspNet
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
-                    options.Authority = "http://localhost:5000";
+                    options.Authority = "http://localhost:8002";
                     options.RequireHttpsMetadata = false;
                     options.Audience = "user";
                     options.TokenValidationParameters.ValidateIssuer = false;
@@ -131,8 +147,14 @@ namespace RepostAspNet
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            // Log any ConfigureService log messages
+            foreach (var (level, message) in _log)
+            {
+                logger.Log(level, message);
+            }
+
             // Use OpenAPI with the route set to {documentName}.json (resolves to openapi.json)
             app.UseSwagger(options => options.RouteTemplate = "{documentName}.json");
 
