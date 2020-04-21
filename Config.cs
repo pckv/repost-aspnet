@@ -12,6 +12,7 @@ namespace RepostAspNet
         IEnumerable<ApiResource> Apis { get; }
         IEnumerable<Client> Clients { get; }
         X509Certificate2 SigningCredential { get; }
+        string DatabaseConnectionString { get; }
     }
 
     public class Config : IConfig
@@ -70,5 +71,8 @@ namespace RepostAspNet
                 return new X509Certificate2(path, password);
             }
         }
+
+        public string DatabaseConnectionString => Configuration["DATABASE_CONNECTION_STRING"] ??
+                                                  Configuration.GetConnectionString("DefaultConnection");
     }
 }
