@@ -21,6 +21,7 @@ namespace RepostAspNet
     public class Startup
     {
         private readonly IConfig _config;
+        private readonly string _corsPolicy = "_CorsPolicy";
 
         // The Logger in Core 3 is not initialized until Startup.Configure
         private readonly List<(LogLevel, string)> _log;
@@ -39,6 +40,18 @@ namespace RepostAspNet
                 // Create an in memory database
                 // TODO: Use SQL
                 options.UseInMemoryDatabase("RepostDatabase");
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(_corsPolicy, policyBuilder =>
+                {
+                    policyBuilder
+                        .WithOrigins(_config.Origins.ToArray())
+                        .AllowCredentials()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
             });
 
             services.AddControllers(options =>
@@ -173,6 +186,8 @@ namespace RepostAspNet
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(_corsPolicy);
 
             app.UseIdentityServer();
             app.UseAuthorization();
