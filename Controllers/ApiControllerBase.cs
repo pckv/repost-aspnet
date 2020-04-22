@@ -11,9 +11,9 @@ namespace RepostAspNet.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class ApiControllerBase : ControllerBase
     {
-        protected readonly DatabaseContext Db;
+        protected readonly RepostContext Db;
 
-        public ApiControllerBase(DatabaseContext context)
+        public ApiControllerBase(RepostContext context)
         {
             Db = context;
         }
