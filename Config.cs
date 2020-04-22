@@ -11,6 +11,7 @@ namespace RepostAspNet
     {
         IEnumerable<ApiResource> Apis { get; }
         IEnumerable<Client> Clients { get; }
+        IEnumerable<string> Origins { get; }
         X509Certificate2 SigningCredential { get; }
         string DatabaseConnectionString { get; }
     }
@@ -43,6 +44,9 @@ namespace RepostAspNet
                 AllowedScopes = {"user"}
             }
         };
+
+        public IEnumerable<string> Origins => (Configuration["Origins"] ?? Configuration["ORIGINS"] ??
+            "http://localhost;http://localhost:8080").Split(';');
 
         public X509Certificate2 SigningCredential
         {
