@@ -48,6 +48,8 @@ namespace RepostAspNet
                 services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
             }
 
+            _log.Add((LogLevel.Information, $"Allowing CORS from: {string.Join(' ', _config.Origins)}"));
+
             services.AddCors(options =>
             {
                 options.AddPolicy(_corsPolicy, policyBuilder =>
