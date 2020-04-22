@@ -7,11 +7,11 @@ namespace RepostAspNet
 {
     public class ResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
-        private readonly DatabaseContext _databaseContext;
+        private readonly RepostContext _repostContext;
 
-        public ResourceOwnerPasswordValidator(DatabaseContext databaseContext)
+        public ResourceOwnerPasswordValidator(RepostContext repostContext)
         {
-            _databaseContext = databaseContext;
+            _repostContext = repostContext;
         }
 
         public async Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
@@ -21,7 +21,7 @@ namespace RepostAspNet
 
         private GrantValidationResult ValidateUser(string username, string password)
         {
-            var user = _databaseContext.Users.SingleOrDefault(u => u.Username == username);
+            var user = _repostContext.Users.SingleOrDefault(u => u.Username == username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.HashedPassword))
             {
                 return new GrantValidationResult(TokenRequestErrors.InvalidGrant);

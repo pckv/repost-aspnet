@@ -14,7 +14,7 @@ namespace RepostAspNet.Controllers
     {
         private readonly UserController _userController;
 
-        public ResubController(DatabaseContext context, UserController userController) : base(context)
+        public ResubController(RepostContext context, UserController userController) : base(context)
         {
             _userController = userController;
         }
