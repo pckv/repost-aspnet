@@ -42,6 +42,8 @@ namespace RepostAspNet
                 options.UseInMemoryDatabase("RepostDatabase");
             });
 
+            _log.Add((LogLevel.Information, $"Allowing CORS from: {string.Join(' ', _config.Origins)}"));
+
             services.AddCors(options =>
             {
                 options.AddPolicy(_corsPolicy, policyBuilder =>
