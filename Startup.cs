@@ -35,12 +35,18 @@ namespace RepostAspNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DatabaseContext>(options =>
+            var connectionString = _config.DatabaseConnectionString;
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                // Create an in memory database
-                // TODO: Use SQL
-                options.UseInMemoryDatabase("RepostDatabase");
-            });
+                _log.Add((LogLevel.Warning,
+                    "No database connection string provided. Defaulting to in-memory database"));
+                services.AddDbContext<RepostContext>(options =>
+                    options.UseInMemoryDatabase("RepostContext"));
+            }
+            else
+            {
+                services.AddDbContext<RepostContext>(options => options.UseNpgsql(connectionString));
+            }
 
             _log.Add((LogLevel.Information, $"Allowing CORS from: {string.Join(' ', _config.Origins)}"));
 
