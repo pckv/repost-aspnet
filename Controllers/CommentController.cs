@@ -12,7 +12,7 @@ namespace RepostAspNet.Controllers
     [Route("/api/comments")]
     public class CommentController : ApiControllerBase
     {
-        public CommentController(DatabaseContext context) : base(context)
+        public CommentController(RepostContext context) : base(context)
         {
         }
 

@@ -13,7 +13,7 @@ namespace RepostAspNet.Controllers
     [Route("/api/posts")]
     public class PostController : ApiControllerBase
     {
-        public PostController(DatabaseContext context) : base(context)
+        public PostController(RepostContext context) : base(context)
         {
         }
 

@@ -13,7 +13,7 @@ namespace RepostAspNet.Controllers
     [Route("/api/users")]
     public class UserController : ApiControllerBase
     {
-        public UserController(DatabaseContext context) : base(context)
+        public UserController(RepostContext context) : base(context)
         {
         }
 

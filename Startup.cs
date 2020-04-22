@@ -39,12 +39,12 @@ namespace RepostAspNet
             {
                 _log.Add((LogLevel.Warning,
                     "No database connection string provided. Defaulting to in-memory database"));
-                services.AddDbContext<DatabaseContext>(options =>
+                services.AddDbContext<RepostContext>(options =>
                     options.UseInMemoryDatabase("RepostContext"));
             }
             else
             {
-                services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
+                services.AddDbContext<RepostContext>(options => options.UseNpgsql(connectionString));
             }
 
             services.AddControllers(options =>

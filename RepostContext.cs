@@ -3,9 +3,9 @@ using RepostAspNet.Models;
 
 namespace RepostAspNet
 {
-    public class DatabaseContext : DbContext
+    public class RepostContext : DbContext
     {
-        public DatabaseContext(DbContextOptions options) : base(options)
+        public RepostContext(DbContextOptions options) : base(options)
         {
         }
 
