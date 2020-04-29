@@ -153,11 +153,14 @@ namespace RepostAspNet.Controllers
         [Route("{post_id}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Comment> GetCommentsInPost([FromRoute(Name = "post_id")] int postId)
+        public IEnumerable<Comment> GetCommentsInPost([FromRoute(Name = "post_id")] int postId, int page = 0,
+            [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             var post = GetPost(postId);
             Db.Entry(post)
                 .Collection(p => p.Comments).Query()
+                .Skip(page * pageSize)
+                .Take(pageSize)
                 .Include(c => c.ParentResub)
                 .Include(c => c.ParentPost)
                 .Include(c => c.ParentComment)
