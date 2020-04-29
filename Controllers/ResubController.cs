@@ -22,9 +22,13 @@ namespace RepostAspNet.Controllers
         /// <summary>Get Resubs</summary>
         /// <remarks>Get all resubs.</remarks>
         [HttpGet]
-        public IEnumerable<Resub> GetResubs()
+        public IEnumerable<Resub> GetResubs(int page = 0, [FromQuery(Name = "page_size")] int pageSize = 100)
         {
-            return Db.Resubs.Include(r => r.Owner).ToList();
+            return Db.Resubs
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .Include(r => r.Owner)
+                .ToList();
         }
 
         /// <summary>Create Resub</summary>
@@ -136,11 +140,14 @@ namespace RepostAspNet.Controllers
         [Route("{resub}/posts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Post> GetPostsInResub([FromRoute(Name = "resub")] string name)
+        public IEnumerable<Post> GetPostsInResub([FromRoute(Name = "resub")] string name, int page = 0,
+            [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             var resub = GetResub(name);
             Db.Entry(resub)
                 .Collection(r => r.Posts).Query()
+                .Skip(page * pageSize)
+                .Take(pageSize)
                 .Include(p => p.Author)
                 .Include(p => p.Votes)
                 .Load();

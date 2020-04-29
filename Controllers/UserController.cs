@@ -110,10 +110,15 @@ namespace RepostAspNet.Controllers
         [Route("{username}/resubs")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Resub> GetResubsOwnedByUser(string username)
+        public IEnumerable<Resub> GetResubsOwnedByUser(string username, int page = 0,
+            [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             var user = GetUser(username);
-            Db.Entry(user).Collection(u => u.Resubs).Load();
+            Db.Entry(user)
+                .Collection(u => u.Resubs).Query()
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .Load();
             return user.Resubs;
         }
 
@@ -123,10 +128,14 @@ namespace RepostAspNet.Controllers
         [Route("{username}/posts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Post> GetPostsByUser(string username)
+        public IEnumerable<Post> GetPostsByUser(string username, int page = 0,
+            [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             var user = GetUser(username);
-            Db.Entry(user).Collection(u => u.Posts).Query()
+            Db.Entry(user)
+                .Collection(u => u.Posts).Query()
+                .Skip(page * pageSize)
+                .Take(pageSize)
                 .Include(p => p.ParentResub)
                 .Include(p => p.Votes)
                 .Load();
@@ -140,10 +149,14 @@ namespace RepostAspNet.Controllers
         [Route("{username}/comments")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public IEnumerable<Comment> GetCommentsByUser(string username)
+        public IEnumerable<Comment> GetCommentsByUser(string username, int page = 0,
+            [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             var user = GetUser(username);
-            Db.Entry(user).Collection(u => u.Comments).Query()
+            Db.Entry(user)
+                .Collection(u => u.Comments).Query()
+                .Skip(page * pageSize)
+                .Take(pageSize)
                 .Include(c => c.ParentResub)
                 .Include(c => c.ParentPost)
                 .Include(c => c.ParentComment)
