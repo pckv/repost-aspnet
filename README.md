@@ -5,12 +5,12 @@ implementation of the Repost API.
 ## Installation
 [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) is required.
 
-1. Clone the repository:
+1. Clone the repository
 ```bash
 git clone https://github.com/pckv/repost-aspnet.git
 ```
 
-2. Navigate to the `repost-spring` directory and publish the configuration.
+2. Navigate to the `repost-spring` directory and publish the configuration
 ```bash
 cd repost-fastapi
 dotnet publish --configuration Release
@@ -36,3 +36,7 @@ The API can now be executed using the compiled binary found in the `bin` folder.
 ```bash
 bin/Release/netcoreapp3.1/publish/RepostAspNet
 ```
+
+## Documentation
+Documentation for the API is available after deployment at the `/api/swagger` and 
+`/api/docs` endpoints.
