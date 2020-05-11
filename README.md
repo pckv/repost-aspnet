@@ -10,9 +10,9 @@ implementation of the Repost API.
 git clone https://github.com/pckv/repost-aspnet.git
 ```
 
-2. Navigate to the `repost-spring` directory and publish the configuration
+2. Navigate to the `repost-aspnet` directory and publish the configuration
 ```bash
-cd repost-fastapi
+cd repost-aspnet
 dotnet publish --configuration Release
 ```
 
