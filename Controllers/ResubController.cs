@@ -25,6 +25,7 @@ namespace RepostAspNet.Controllers
         public IEnumerable<Resub> GetResubs(int page = 0, [FromQuery(Name = "page_size")] int pageSize = 100)
         {
             return Db.Resubs
+                .OrderByDescending(r => r.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Include(r => r.Owner)
@@ -146,6 +147,7 @@ namespace RepostAspNet.Controllers
             var resub = GetResub(name);
             Db.Entry(resub)
                 .Collection(r => r.Posts).Query()
+                .OrderByDescending(p => p.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Include(p => p.Author)
