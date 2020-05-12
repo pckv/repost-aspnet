@@ -116,6 +116,7 @@ namespace RepostAspNet.Controllers
             var user = GetUser(username);
             Db.Entry(user)
                 .Collection(u => u.Resubs).Query()
+                .OrderByDescending(r => r.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Load();
@@ -134,6 +135,7 @@ namespace RepostAspNet.Controllers
             var user = GetUser(username);
             Db.Entry(user)
                 .Collection(u => u.Posts).Query()
+                .OrderByDescending(p => p.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Include(p => p.ParentResub)
@@ -155,6 +157,7 @@ namespace RepostAspNet.Controllers
             var user = GetUser(username);
             Db.Entry(user)
                 .Collection(u => u.Comments).Query()
+                .OrderByDescending(c => c.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Include(c => c.ParentResub)

@@ -159,6 +159,7 @@ namespace RepostAspNet.Controllers
             var post = GetPost(postId);
             Db.Entry(post)
                 .Collection(p => p.Comments).Query()
+                .OrderByDescending(c => c.Created)
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .Include(c => c.ParentResub)
