@@ -160,7 +160,6 @@ namespace RepostAspNet
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
-                    options.Authority = "http://localhost:8002";
                     options.RequireHttpsMetadata = false;
                     options.Audience = "user";
                     options.TokenValidationParameters.ValidateIssuer = false;
